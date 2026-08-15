@@ -9,7 +9,7 @@ from one of the links below and drop them in here.
 
 - **Original public source (NASA Prognostics Data Repository, via AWS):**
   https://phm-datasets.s3.amazonaws.com/NASA/4.+Bearings.zip
-- **Mirror (Google Drive):** `<ADD YOUR GOOGLE DRIVE LINK HERE>`
+- **Mirror (Google Drive):** `<ADD YOUR GOOGLE DRIVE LINK HERE>` (well i didnt add it for now takes too much drive space)
 
 ## Folder layout
 
