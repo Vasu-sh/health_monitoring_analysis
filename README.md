@@ -7,11 +7,12 @@ flags the onset of degradation, and names the most likely root cause —
 unbalance, misalignment, or a specific bearing defect (outer race / inner
 race / roller / cage) — using bearing-geometry defect frequencies, not a
 black-box model.
+here is the streamlit direct link to the application https://healthmonitoringanalysis-ckhan8dk8yztf47wcxxt8r.streamlit.app/
 
 > Built as a portfolio project to demonstrate applied vibration analysis
 > and predictive-maintenance engineering, currently scoped to bearing-fault
 > physics on the IMS dataset.
-here is the streamlit direct link to the application https://healthmonitoringanalysis-ckhan8dk8yztf47wcxxt8r.streamlit.app/
+
 ## What it does
 
 - **Order + spectral analysis** — RMS, crest factor, kurtosis, and FFT-derived
