@@ -1,6 +1,6 @@
 # ⚙️ Multi-Modal Fleet Diagnostics Engine
 
-A physics-based **predictive maintenance (PdM) dashboard** for rolling-element
+A physics-based **predictive maintenance (PdM) dashboard** (mainly onlt health monitoring for now not PdM but will be in future)for rolling-element
 bearing fault diagnosis, built on the NASA/IMS run-to-failure vibration
 dataset. It turns raw vibration snapshots into a per-sensor health trend,
 flags the onset of degradation, and names the most likely root cause —
