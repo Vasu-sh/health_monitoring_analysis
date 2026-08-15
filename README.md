@@ -8,6 +8,7 @@ unbalance, misalignment, or a specific bearing defect (outer race / inner
 race / roller / cage) — using bearing-geometry defect frequencies, not a
 black-box model.
 here is the streamlit direct link to the application https://healthmonitoringanalysis-ckhan8dk8yztf47wcxxt8r.streamlit.app/
+
 video walk through drive link: https://drive.google.com/file/d/1T13bMYoAWqBmheOs5bShbCWCLREQkhi7/view?usp=sharing
 
 > Built as a portfolio project to demonstrate applied vibration analysis
