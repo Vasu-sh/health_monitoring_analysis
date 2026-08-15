@@ -1,0 +1,34 @@
+# ---- Raw sensor data (too large for git; see data/README.md for the download link) ----
+data/set1_data/*
+data/set2_data/*
+data/set3_data/*
+!data/set1_data/.gitkeep
+!data/set2_data/.gitkeep
+!data/set3_data/.gitkeep
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+*.egg
+
+# ---- Virtual environments ----
+venv/
+.venv/
+env/
+ENV/
+
+# ---- Streamlit ----
+.streamlit/secrets.toml
+
+# ---- OS / editor junk ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ---- Local scratch outputs (keep the committed outputs/set2_data sample, ignore new runs) ----
+outputs/*
+!outputs/set2_data/
+!outputs/.gitkeep
