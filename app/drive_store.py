@@ -134,10 +134,17 @@ def save_state(sensors: dict, pipeline_results: Dict[str, pd.DataFrame], alerts:
         if file_id:
             service.files().update(fileId=file_id, media_body=media).execute()
         else:
-            metadata = {"name": FILE_NAME}
             folder_id = st.secrets.get("gcp_drive_folder_id")
-            if folder_id:
-                metadata["parents"] = [folder_id]
+            if not folder_id:
+                print("[drive_store] save_state: gcp_drive_folder_id secret is missing or empty.")
+                st.sidebar.warning(
+                    "Shared storage misconfigured: gcp_drive_folder_id secret is missing. "
+                    "Service accounts have no Drive storage of their own -- a shared folder ID "
+                    "is required. Check your Streamlit secrets for a top-level "
+                    'gcp_drive_folder_id = "..." line (outside the [gcp_service_account] block).'
+                )
+                return False
+            metadata = {"name": FILE_NAME, "parents": [folder_id]}
             service.files().create(body=metadata, media_body=media, fields="id").execute()
         return True
     except Exception as e:
