@@ -14,7 +14,7 @@ video walk through drive link: https://drive.google.com/file/d/1T13bMYoAWqBmheOs
 ## Shared storage (optional)
 
 By default each visitor's session is independent — nothing persists.
-You can wire the app to a single shared Google Drive file so every
+i have wired the app to a single shared Google Drive file so every
 visitor sees the same fleet of sensors, analysis results, and alerts.
 See [SETUP_DRIVE.md](SETUP_DRIVE.md).
 
