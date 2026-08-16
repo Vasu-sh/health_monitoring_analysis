@@ -28,6 +28,7 @@ import streamlit as st
 try:
     from google.oauth2 import service_account
     from googleapiclient.discovery import build
+    from googleapiclient.errors import HttpError
     from googleapiclient.http import MediaIoBaseDownload, MediaIoBaseUpload
     _GOOGLE_LIBS_AVAILABLE = True
 except ImportError:
@@ -62,6 +63,22 @@ def _find_file_id(service) -> Optional[str]:
     return files[0]["id"] if files else None
 
 
+def _describe_error(e: Exception) -> str:
+    """Pull the actual HTTP status + reason out of an HttpError instead of
+    just showing the generic exception class name."""
+    if _GOOGLE_LIBS_AVAILABLE and isinstance(e, HttpError):
+        status = getattr(e.resp, "status", "?")
+        try:
+            reason = e.error_details[0].get("reason", "") if e.error_details else ""
+        except Exception:
+            reason = ""
+        detail = f"HTTP {status}"
+        if reason:
+            detail += f" ({reason})"
+        return detail
+    return e.__class__.__name__
+
+
 def load_state() -> Optional[Dict[str, Any]]:
     """Returns {"sensors": dict, "pipeline_results": {sensor_id: DataFrame},
     "alerts": list}, or None if Drive isn't configured/reachable -- caller
@@ -92,7 +109,8 @@ def load_state() -> Optional[Dict[str, Any]]:
             "alerts": raw.get("alerts", []),
         }
     except Exception as e:
-        st.sidebar.warning(f"Shared storage unavailable ({e.__class__.__name__}) -- running local-only this session.")
+        print(f"[drive_store] load_state failed: {e!r}")
+        st.sidebar.warning(f"Shared storage unavailable ({_describe_error(e)}) -- running local-only this session.")
         return None
 
 
@@ -123,5 +141,6 @@ def save_state(sensors: dict, pipeline_results: Dict[str, pd.DataFrame], alerts:
             service.files().create(body=metadata, media_body=media, fields="id").execute()
         return True
     except Exception as e:
-        st.sidebar.warning(f"Couldn't save to shared storage ({e.__class__.__name__}) -- your change stays visible to you this session, but may not persist for others.")
+        print(f"[drive_store] save_state failed: {e!r}")
+        st.sidebar.warning(f"Couldn't save to shared storage ({_describe_error(e)}) -- your change stays visible to you this session, but may not persist for others.")
         return False
