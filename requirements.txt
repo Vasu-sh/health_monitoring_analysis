@@ -4,3 +4,5 @@ pandas>=2.0
 scipy>=1.11
 plotly>=5.20
 matplotlib>=3.8
+google-api-python-client>=2.140
+google-auth>=2.34
