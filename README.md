@@ -11,6 +11,14 @@ here is the streamlit direct link to the application https://healthmonitoringana
 
 video walk through drive link: https://drive.google.com/file/d/1T13bMYoAWqBmheOs5bShbCWCLREQkhi7/view?usp=sharing
 
+## Shared storage (optional)
+
+By default each visitor's session is independent — nothing persists.
+You can wire the app to a single shared Google Drive file so every
+visitor sees the same fleet of sensors, analysis results, and alerts.
+See [SETUP_DRIVE.md](SETUP_DRIVE.md).
+
+
 > Built as a portfolio project to demonstrate applied vibration analysis
 > and predictive-maintenance engineering, currently scoped to bearing-fault
 > physics on the IMS dataset.
