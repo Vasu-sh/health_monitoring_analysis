@@ -35,7 +35,7 @@ except ImportError:
     _GOOGLE_LIBS_AVAILABLE = False
 
 FILE_NAME = "pdm_fleet_state.json"
-SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
 def drive_configured() -> bool:
@@ -75,6 +75,12 @@ def _describe_error(e: Exception) -> str:
         detail = f"HTTP {status}"
         if reason:
             detail += f" ({reason})"
+        if reason == "storageQuotaExceeded":
+            detail += (
+                " -- service accounts have no Drive storage of their own. Create "
+                f"an empty {FILE_NAME} yourself in the shared folder (as your own "
+                "account) so the app only ever updates it, never creates it."
+            )
         return detail
     return e.__class__.__name__
 
