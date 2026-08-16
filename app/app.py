@@ -15,6 +15,12 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Multi-Modal PdM Fleet Engine", layout="wide")
 
+# Shared Drive-backed storage (optional -- see SETUP_DRIVE.md). Import is
+# always safe: drive_store handles its own missing-library/missing-secret
+# fallback internally, so this never breaks a local run without it set up.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from drive_store import load_state as load_shared_state, save_state as save_shared_state
+
 # ==========================================
 # PIPELINE INTEGRATION (pipeline/ package)
 # ==========================================
@@ -126,8 +132,21 @@ if 'pipeline_results' not in st.session_state:
     # raw features, z_<feature>, health_indicator, onset_flagged)
     st.session_state.pipeline_results = {}
 
-# Mock Historical Alerts Database (Feeds Section 5) -- seed rows only; real
-# analysis runs append to this list via sync_pipeline_alerts() below.
+# One-time load from shared Google Drive storage (if configured), so every
+# visitor starts from the same fleet state instead of an empty one. Runs
+# once per browser session; silently no-ops if Drive isn't set up.
+if '_shared_state_loaded' not in st.session_state:
+    _shared = load_shared_state()
+    if _shared:
+        st.session_state.sensors.update(_shared["sensors"])
+        st.session_state.pipeline_results.update(_shared["pipeline_results"])
+        if _shared["alerts"]:
+            st.session_state.alerts = _shared["alerts"]
+    st.session_state._shared_state_loaded = True
+
+# Mock Historical Alerts Database (Feeds Section 5) -- seed rows only, used
+# when shared storage isn't configured or is still empty; real analysis
+# runs append to this list via sync_pipeline_alerts() below.
 if 'alerts' not in st.session_state:
     st.session_state.alerts = [
         {"Timestamp": "2026-07-21 21:45:00", "Sensor_ID": "PUMP-04-NODE", "Zone": "Compressor Station Alpha", "Severity": "🔴 Critical", "Root_Cause": "Unbalance", "Category": "Rotor-Level", "Value": "7.5 mm/s"},
@@ -173,7 +192,9 @@ def build_demo_trend(sensor_id, n_points=50, channel_name="ch1"):
 def sync_pipeline_alerts(zone_lookup, health_z_thresh):
     """Turn the latest reading of every analyzed sensor/channel into a Section 5
     alert row, so the fleet log reflects real (or demo) pipeline output instead
-    of only the three seed rows."""
+    of only the three seed rows. Returns True if any new alert was appended,
+    so the caller knows whether shared storage needs a fresh save."""
+    changed = False
     for sid, df in st.session_state.pipeline_results.items():
         for chan, g in df.groupby("channel"):
             g = g.sort_values("file_index")
@@ -196,6 +217,8 @@ def sync_pipeline_alerts(zone_lookup, health_z_thresh):
                 "Value": f"{latest['health_indicator']:.2f} (z-score)",
                 "_key": key,
             })
+            changed = True
+    return changed
 
 
 # ==========================================
@@ -430,7 +453,8 @@ sample_interval_minutes = st.session_state.get("sample_interval_input", 10)
 # Keep the fleet alert log in sync every run, not only while Section 5 is
 # the visible page, so the Priority Queue / alert count are always current.
 zone_lookup = {sid: s.get("Zone", "Unknown") for sid, s in st.session_state.sensors.items()}
-sync_pipeline_alerts(zone_lookup, health_z_thresh)
+if sync_pipeline_alerts(zone_lookup, health_z_thresh):
+    save_shared_state(st.session_state.sensors, st.session_state.pipeline_results, st.session_state.alerts)
 
 # ==========================================
 # SECTION 1: DEPLOY HARDWARE
@@ -470,6 +494,7 @@ if page == "1":
                     "Component": machine_cat, "RPM": rpm_val, "Benchmark": bench_source_val,
                     "Targets": ", ".join(target_faults), "Schema": req_format, "Last_Ping": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 }
+                save_shared_state(st.session_state.sensors, st.session_state.pipeline_results, st.session_state.alerts)
                 st.success(f"Node [{sensor_id}] successfully deployed. Continuing to **2. Fleet Directory** →")
                 st.session_state.current_page = "2"
                 st.rerun()
@@ -575,6 +600,7 @@ elif page == "3":
                         st.session_state.pipeline_results[active_sensor] = trend
                         st.session_state.target_sensor = active_sensor
                         st.session_state.analysis_ready = True
+                        save_shared_state(st.session_state.sensors, st.session_state.pipeline_results, st.session_state.alerts)
 
                         if save_to_disk and out_root:
                             run_out_dir = resolve_out_dir(out_root, full_path)
@@ -611,6 +637,7 @@ elif page == "3":
                         st.session_state.pipeline_results[active_sensor] = trend
                         st.session_state.target_sensor = active_sensor
                         st.session_state.analysis_ready = True
+                        save_shared_state(st.session_state.sensors, st.session_state.pipeline_results, st.session_state.alerts)
                         st.success(f"Analyzed {len(manual_files)} snapshots. Continuing to **4. Diagnostics** →")
                         st.session_state.current_page = "4"
                         st.rerun()
