@@ -53,13 +53,21 @@ def _get_service():
     return build("drive", "v3", credentials=creds, cache_discovery=False)
 
 
-def _find_file_id(service) -> Optional[str]:
+def _find_file_id(service, debug: bool = False) -> Optional[str]:
     folder_id = st.secrets.get("gcp_drive_folder_id")
     query = f"name = '{FILE_NAME}' and trashed = false"
     if folder_id:
         query += f" and '{folder_id}' in parents"
-    result = service.files().list(q=query, spaces="drive", fields="files(id)").execute()
+    result = service.files().list(q=query, spaces="drive", fields="files(id, name, parents, owners)").execute()
     files = result.get("files", [])
+    if debug:
+        st.sidebar.info(
+            f"**Drive debug**\n\n"
+            f"- folder_id secret: `{folder_id!r}`\n"
+            f"- query: `{query}`\n"
+            f"- files found: {len(files)}\n"
+            + "\n".join(f"  - {f}" for f in files)
+        )
     return files[0]["id"] if files else None
 
 
@@ -93,7 +101,7 @@ def load_state() -> Optional[Dict[str, Any]]:
         return None
     try:
         service = _get_service()
-        file_id = _find_file_id(service)
+        file_id = _find_file_id(service, debug=st.secrets.get("gcp_debug", False))
         if file_id is None:
             return {"sensors": {}, "pipeline_results": {}, "alerts": []}
 
@@ -136,7 +144,7 @@ def save_state(sensors: dict, pipeline_results: Dict[str, pd.DataFrame], alerts:
         raw_bytes = json.dumps(payload, default=str).encode("utf-8")
         media = MediaIoBaseUpload(io.BytesIO(raw_bytes), mimetype="application/json", resumable=False)
 
-        file_id = _find_file_id(service)
+        file_id = _find_file_id(service, debug=st.secrets.get("gcp_debug", False))
         if file_id:
             service.files().update(fileId=file_id, media_body=media).execute()
         else:
