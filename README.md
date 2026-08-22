@@ -9,6 +9,7 @@ race / roller / cage) — using bearing-geometry defect frequencies, not a
 black-box model.
 here is the streamlit direct link to the application https://healthmonitoringanalysis-ckhan8dk8yztf47wcxxt8r.streamlit.app/
 
+if above streamlit link's drive storage failed in saving please refresh page once or twice to load saved fleet directory and results. 
 video walk through drive link: https://drive.google.com/file/d/1T13bMYoAWqBmheOs5bShbCWCLREQkhi7/view?usp=sharing
 
 ## Shared storage (optional)
